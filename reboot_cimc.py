@@ -60,7 +60,7 @@ class CIMC:
         self.interfaces = []
         self.deviceNumber = 0
 
-    # Method configure_router
+    # Method reboot_cimc
     #
     # Input: None
     # Output: None
@@ -82,8 +82,7 @@ class CIMC:
             # Bypass SSH Key accept policy
             remote_conn_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             # Attempt to connection
-            remote_conn_pre.connect(self.ipAddress, username=self.username, password=self.password, look_for_keys=False,
-                                    allow_agent=False)
+            remote_conn_pre.connect(self.ipAddress, username=self.username, password=self.password, port=22)
             # Log into WAE
             remote_conn = remote_conn_pre.invoke_shell()
             time.sleep(15)
@@ -237,7 +236,7 @@ def reboot_cimc_worker(device):
         time.sleep(device.deviceNumber)
 
     logger.info("Starting worker for %s - %s of %s" % (str(device.ipAddress), str(device.deviceNumber), str(deviceCount)))
-    i = device.configure_router()
+    i = device.reboot_cimc()
 
     # If discovered, parse data
     if i == 0:
@@ -301,7 +300,7 @@ def main(**kwargs):
     cimcs = build_cimc_list(cimcList, args.username, args.password)
     
     # Set Device count
-    deviceCount = len(myRouters)
+    deviceCount = len(cimcs)
     
     # Build Thread Pool
     pool = ThreadPool(WORKER_COUNT)
